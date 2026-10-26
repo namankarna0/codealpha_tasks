@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>URL Shortener</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main>
+    <h1>URL Shortener</h1>
+    <form id="shorten-form">
+      <input id="url" type="url" required
+             placeholder="https://example.com/a/very/long/link">
+      <button type="submit">Shorten</button>
+    </form>
+    
+    <!-- Result area with Copy Button -->
+    <div id="result-container" style="display: none; margin-top: 1rem;">
+      <p id="result-text" style="margin-bottom: 0.5rem;"></p>
+      <button type="button" id="copy-btn" class="copy-btn">Copy Link</button>
+    </div>
+  </main>
+
+  <script>
+    const form = document.getElementById('shorten-form');
+    const resultContainer = document.getElementById('result-container');
+    const resultText = document.getElementById('result-text');
+    const copyBtn = document.getElementById('copy-btn');
+    let currentShortUrl = '';
+
+    // Handle form submission
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      resultContainer.style.display = 'none';
+      resultText.textContent = 'Working…';
+      resultContainer.style.display = 'block';
+      
+      try {
+        const res = await fetch('/api/shorten', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: document.getElementById('url').value }),
+        });
+        const data = await res.json();
+        
+        if (res.ok) {
+          currentShortUrl = data.short_url;
+          resultText.innerHTML = `Short link: <a href="${data.short_url}" target="_blank">${data.short_url}</a>`;
+          copyBtn.style.display = 'inline-block';
+        } else {
+          resultText.textContent = `Error: ${data.error}`;
+          copyBtn.style.display = 'none';
+        }
+      } catch (err) {
+        resultText.textContent = 'Network error: ' + err.message;
+        copyBtn.style.display = 'none';
+      }
+    });
+
+    // Handle copy button click
+    copyBtn.addEventListener('click', async () => {
+      if (!currentShortUrl) return;
+      
+      try {
+        // Modern Clipboard API
+        await navigator.clipboard.writeText(currentShortUrl);
+        const originalText = copyBtn.textContent;
+        copyBtn.textContent = 'Copied!';
+        copyBtn.style.backgroundColor = '#28a745'; // Green
+        copyBtn.style.color = 'white';
+        
+        // Revert button after 2 seconds
+        setTimeout(() => {
+          copyBtn.textContent = originalText;
+          copyBtn.style.backgroundColor = ''; // Revert to CSS default
+          copyBtn.style.color = '';
+        }, 2000);
+      } catch (err) {
+        console.error('Failed to copy text: ', err);
+        alert('Failed to copy to clipboard.');
+      }
+    });
+  </script>
+</body>
+</html>

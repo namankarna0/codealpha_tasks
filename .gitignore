@@ -1,0 +1,19 @@
+cat > .gitignore << 'EOF'
+# Virtual environments
+.venv/
+venv/
+
+# Python generated files
+__pycache__/
+*.py[cod]
+
+# Pytest
+.pytest_cache/
+
+# Environment variables and secrets
+.env
+
+# SQLite databases
+*.sqlite3
+db.sqlite3
+EOF

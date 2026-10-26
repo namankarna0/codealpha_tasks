@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Event Registration</title>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; }
+        .event-card { border: 1px solid #ccc; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .event-title { margin-top: 0; color: #333; }
+        .btn { padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .btn:hover { background: #0056b3; }
+        .full { background: #dc3545; cursor: not-allowed; }
+        #message { padding: 10px; margin-bottom: 20px; display: none; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+
+    <h1>Upcoming Events</h1>
+    <div id="message"></div>
+
+    <div id="events-container">
+        <!-- Events will be loaded here by JavaScript -->
+    </div>
+
+    <script>
+        // Get the CSRF token from the cookie (Required for Django POST requests)
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        async function loadEvents() {
+            // Fetch events from our API
+            const response = await fetch('/api/events/');
+            const events = await response.json();
+            const container = document.getElementById('events-container');
+            container.innerHTML = '';
+
+            events.forEach(event => {
+                // Format the date nicely
+                const date = new Date(event.date).toLocaleString();
+                
+                // Determine if button should be disabled
+                const isFull = event.spaces_left <= 0;
+                const btnClass = isFull ? 'btn full' : 'btn';
+                const btnText = isFull ? 'Event Full' : 'Register Now';
+
+                container.innerHTML += `
+                    <div class="event-card">
+                        <h2 class="event-title">${event.title}</h2>
+                        <p>${event.description}</p>
+                        <p><strong>Date:</strong> ${date}</p>
+                        <p><strong>Location:</strong> ${event.location}</p>
+                        <p><strong>Spaces Left:</strong> ${event.spaces_left} / ${event.capacity}</p>
+                        <button class="${btnClass}" onclick="registerForEvent(${event.id})" ${isFull ? 'disabled' : ''}>
+                            ${btnText}
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        async function registerForEvent(eventId) {
+            const response = await fetch(`/api/events/${eventId}/register/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'), // Pass the CSRF token
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            const data = await response.json();
+            const msgBox = document.getElementById('message');
+
+            if (response.ok) {
+                msgBox.className = 'success';
+                msgBox.textContent = data.message;
+                msgBox.style.display = 'block';
+                loadEvents(); // Refresh the list to update spaces
+            } else {
+                msgBox.className = 'error';
+                msgBox.textContent = data.error || 'Something went wrong';
+                msgBox.style.display = 'block';
+            }
+        }
+
+        // Load events when page loads
+        document.addEventListener('DOMContentLoaded', loadEvents);
+    </script>
+</body>
+</html>
