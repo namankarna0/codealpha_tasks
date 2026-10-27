@@ -16,4 +16,4 @@ __pycache__/
 # SQLite databases
 *.sqlite3
 db.sqlite3
-EOF
+EOF.vscode/

@@ -8,7 +8,7 @@ Welcome to my repository for the CodeAlpha Backend Development Internship. This 
 | :--- | :--- | :--- | :--- |
 | **1** | **URL Shortener** | Flask, SQLAlchemy, SQLite | [`CodeAlpha_URLShortener/`](./CodeAlpha_URLShortener) |
 | **2** | **Event Registration** | Django, DRF, SQLite | [`CodeAlpha_EventRegistration/`](./CodeAlpha_EventRegistration) |
-| **3** | Restaurant Management | Django, DRF | *Coming Soon* |
+| **3** | **Restaurant Management** | Django, DRF, SQLite | [`CodeAlpha_RestaurantManagement/`](./CodeAlpha_RestaurantManagement) |
 | **4** | Job Board Platform | Django, DRF | *Coming Soon* |
 
 ---
@@ -31,9 +31,25 @@ A robust API and frontend for managing events and user registrations.
 
 ---
 
+## 🚀 Task 3: Restaurant Management System (Django)
+A backend API for handling restaurant operations, from inventory to table bookings.
+* **Features:** Order processing, table reservations, and automatic inventory deduction when items are ordered.
+* **Business Logic:** Implements strict table availability checks (prevents double-booking within a 3-hour window) and capacity validation.
+* **Architecture:** Django REST Framework (DRF) with complex relational models (`Order` -> `OrderItem` -> `MenuItem` -> `InventoryItem`).
+👉 **[Read the Task 3 README](./CodeAlpha_RestaurantManagement/README.md)**
+
+---
+
 ## 🛠️ General Setup Instructions
 Each project folder contains its own `.venv` and `requirements.txt`. To run any project locally:
 
 1. Navigate into the project directory:
    ```bash
    cd CodeAlpha_ProjectName
+
+2. Set up a virtual environment and install dependencies:
+
+bash
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+pip install -r requirements.txt
