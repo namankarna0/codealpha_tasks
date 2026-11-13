@@ -47,7 +47,7 @@ class EventViewSet(viewsets.ModelViewSet):
 class RegistrationViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = RegistrationSerializer
     permission_classes = [permissions.IsAuthenticated]
-    authentication_classes = [CsrfExemptSessionAuthentication] # <--- ADD THIS HERE TOO
+    authentication_classes = [BasicAuthentication] 
 
     def get_queryset(self):
         return Registration.objects.filter(user=self.request.user)
